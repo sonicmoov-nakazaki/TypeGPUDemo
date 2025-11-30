@@ -19,8 +19,8 @@ const demos: Demo[] = [
   },
   {
     id: 'particle-system',
-    title: 'Particle System',
-    description: '大量のパーティクルをGPUで並列処理',
+    title: 'Solar System',
+    description: '太陽系シミュレーション - Compute Shaderで惑星と土星の輪を描画',
   },
   {
     id: 'snow-dome',
