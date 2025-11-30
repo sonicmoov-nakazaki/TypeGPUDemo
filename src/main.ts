@@ -44,7 +44,7 @@ function renderDemoList() {
   for (const demo of demos) {
     const li = document.createElement('li');
     const a = document.createElement('a');
-    a.href = `/typeGPU/src/demos/${demo.id}/`;
+    a.href = `/TypeGPUDemo/src/demos/${demo.id}/`;
     a.innerHTML = `
       <strong>${demo.title}</strong>
       <div class="demo-description">${demo.description}</div>

@@ -24,7 +24,7 @@ function getDemoEntries() {
 }
 
 export default defineConfig({
-  base: '/typeGPU/',
+  base: '/TypeGPUDemo/',
   build: {
     rollupOptions: {
       input: {
