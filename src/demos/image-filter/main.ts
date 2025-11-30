@@ -21,34 +21,48 @@ async function main() {
     // UI作成
     app.innerHTML = `
       <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-          <label>
-            フィルター:
-            <select id="filter-select" style="padding: 0.5rem; background: #1a1a1a; color: #e0e0e0; border: 1px solid #333; border-radius: 4px;">
+        <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 1rem; align-items: end; background: #1a1a1a; padding: 1rem; border-radius: 6px;">
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <span style="font-size: 0.75rem; color: #888;">フィルター</span>
+            <select id="filter-select" style="padding: 0.5rem 0.75rem; background: #2a2a2a; color: #e0e0e0; border: 1px solid #444; border-radius: 4px; cursor: pointer; height: 36px;">
               <option value="none">なし</option>
               <option value="grayscale">グレースケール</option>
               <option value="sepia">セピア</option>
               <option value="invert">反転</option>
               <option value="blur">ぼかし</option>
             </select>
-          </label>
-          <label>
-            強度:
-            <input type="range" id="intensity-slider" min="0" max="100" value="100" style="width: 150px;">
-            <span id="intensity-value">100%</span>
-          </label>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.75rem; color: #888;">強度</span>
+              <span id="intensity-value" style="font-size: 0.75rem; color: #888;">100%</span>
+            </div>
+            <input type="range" id="intensity-slider" min="0" max="100" value="100" style="width: 100%; cursor: pointer; height: 36px;">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <span style="font-size: 0.75rem; color: #888;">画像アップロード</span>
+            <label id="upload-area" style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; height: 36px; border: 1px dashed #444; border-radius: 4px; cursor: pointer; transition: border-color 0.2s;">
+              <input type="file" id="file-input" accept="image/*" style="display: none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span style="font-size: 0.75rem; color: #666;">ファイルを選択</span>
+            </label>
+          </div>
         </div>
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <div>
-            <p style="margin: 0 0 0.5rem 0; color: #888;">元画像</p>
-            <canvas id="source-canvas" width="400" height="300" style="border: 1px solid #333; border-radius: 8px;"></canvas>
+            <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.75rem;">元画像</p>
+            <canvas id="source-canvas" width="512" height="384" style="width: 100%; height: auto; border: 1px solid #333; border-radius: 6px;"></canvas>
           </div>
           <div>
-            <p style="margin: 0 0 0.5rem 0; color: #888;">フィルター適用後</p>
-            <canvas id="result-canvas" width="400" height="300" style="border: 1px solid #333; border-radius: 8px;"></canvas>
+            <p style="margin: 0 0 0.25rem 0; color: #666; font-size: 0.75rem;">フィルター適用後</p>
+            <canvas id="result-canvas" width="512" height="384" style="width: 100%; height: auto; border: 1px solid #333; border-radius: 6px;"></canvas>
           </div>
         </div>
-        <p style="color: #888; font-size: 0.9rem;">GPU (TypeGPU) でリアルタイムに画像フィルターを処理しています</p>
+        <p style="color: #555; font-size: 0.7rem; margin: 0;">GPU (TypeGPU) でリアルタイムに画像フィルターを処理</p>
       </div>
     `;
 
@@ -67,6 +81,8 @@ async function main() {
     const intensityValue = document.getElementById(
       "intensity-value"
     ) as HTMLSpanElement;
+    const fileInput = document.getElementById("file-input") as HTMLInputElement;
+    const uploadArea = document.getElementById("upload-area") as HTMLLabelElement;
 
     const width = sourceCanvas.width;
     const height = sourceCanvas.height;
@@ -101,11 +117,52 @@ async function main() {
       resultCtx.putImageData(resultData, 0, 0);
     }
 
+    // 画像読み込み関数
+    function loadImage(file: File) {
+      const img = new Image();
+      img.onload = () => {
+        // キャンバスにフィットするようにリサイズして描画
+        sourceCtx.clearRect(0, 0, width, height);
+        const scale = Math.min(width / img.width, height / img.height);
+        const drawWidth = img.width * scale;
+        const drawHeight = img.height * scale;
+        const offsetX = (width - drawWidth) / 2;
+        const offsetY = (height - drawHeight) / 2;
+        sourceCtx.fillStyle = "#000";
+        sourceCtx.fillRect(0, 0, width, height);
+        sourceCtx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        applyFilter();
+        URL.revokeObjectURL(img.src);
+      };
+      img.src = URL.createObjectURL(file);
+    }
+
     // イベントリスナー
     filterSelect.addEventListener("change", applyFilter);
     intensitySlider.addEventListener("input", () => {
       intensityValue.textContent = `${intensitySlider.value}%`;
       applyFilter();
+    });
+
+    // ファイル選択
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (file) loadImage(file);
+    });
+
+    // ドラッグ&ドロップ対応
+    uploadArea.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = "#3b82f6";
+    });
+    uploadArea.addEventListener("dragleave", () => {
+      uploadArea.style.borderColor = "#444";
+    });
+    uploadArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = "#444";
+      const file = e.dataTransfer?.files[0];
+      if (file && file.type.startsWith("image/")) loadImage(file);
     });
 
     // 初期描画
