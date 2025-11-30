@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TypeGPU Demos</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: #0a0a0a;
+        color: #e0e0e0;
+      }
+      h1 {
+        color: #fff;
+        border-bottom: 2px solid #3b82f6;
+        padding-bottom: 0.5rem;
+      }
+      .demo-list {
+        list-style: none;
+        padding: 0;
+      }
+      .demo-list li {
+        margin: 1rem 0;
+      }
+      .demo-list a {
+        display: block;
+        padding: 1rem;
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        color: #3b82f6;
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .demo-list a:hover {
+        background: #222;
+        border-color: #3b82f6;
+      }
+      .demo-description {
+        color: #888;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+      }
+      .no-demos {
+        color: #666;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>TypeGPU Demos</h1>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
